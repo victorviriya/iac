@@ -1,34 +1,51 @@
 param location string = resourceGroup().location
-param storageAccountName string = 'toylaunch${uniqueString(resourceGroup().id)}'
-param appServiceAppName string = 'toylaunch${uniqueString(resourceGroup().id)}'
+param namePrefix string = 'wviriya'
 
 @allowed([
   'nonprod'
   'prod'
 ])
-param environmentType string
+param environmentType string = 'nonprod'
+param external bool = false
 
-var storageAccountSkuName = (environmentType == 'prod') ? 'Standard_GRS' : 'Standard_LRS'
-
-resource storageAccount 'Microsoft.Storage/storageAccounts@2019-06-01' = {
-  name: storageAccountName
-  location: location
-  sku: {
-    name: storageAccountSkuName
-  }
-  kind: 'StorageV2'
-  properties: {
-    accessTier: 'Hot'
-  }
-}
-
-module appService 'modules/appService.bicep' = {
-  name: 'appService'
+module vnet 'modules/network.bicep' = {
+  name: '${namePrefix}-vnet'
   params: {
     location: location
-    appServiceAppName: appServiceAppName
+    namePrefix: namePrefix
     environmentType: environmentType
   }
 }
 
-output appServiceAppHostName string = appService.outputs.appServiceAppHostName
+module containerApp 'modules/containerApp.bicep' = {
+  name: '${namePrefix}-containerApp'
+  params: {
+    location: location
+    namePrefix: namePrefix
+    environmentType: environmentType
+    vnetName: vnet.outputs.name
+    external: external
+  }
+}
+
+module appGateway 'modules/appGateway.bicep' = if (!external) {
+  name: '${namePrefix}-appGateway'
+  params: {
+    location: location
+    namePrefix: namePrefix
+    environmentType: environmentType
+    vnetName: vnet.outputs.name
+    containerAppFqdn: containerApp.outputs.fqdn
+  }
+}
+
+module frontDoor 'modules/frontdoor.bicep' = if (external) {
+  name: '${namePrefix}-frontDoor'
+  params: {
+    namePrefix: namePrefix
+    environmentType: environmentType
+    backendAddress: containerApp.outputs.fqdn
+  }
+}
+
+

@@ -1,0 +1,64 @@
+# GitHub Actions Workflow for Bicep CI/CD
+name: CI/CD for Deploying Azure Infrastructure
+on: 
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  RG_NAME: 'iac-demo-rg'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Validate Bicep
+        run: | 
+          az deployment group validate --resource-group ${{ env.RG_NAME }} --template-file ./deploy/main.bicep
+
+  dev:
+    runs-on: ubuntu-latest
+    environment: 'dev'
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Run What-if
+        run: | 
+          az deployment group create --resource-group ${{ env.RG_NAME }} --template-file ./deploy/main.bicep --parameters environmentType=${{ jobs.dev.environment }} --what-if
+
+      - name: Deploy Bicep
+        run: | 
+          az deployment group create --resource-group ${{ env.RG_NAME }} --template-file ./deploy/main.bicep --parameters environmentType=${{ jobs.dev.environment }}
+
+  prod:
+    runs-on: ubuntu-latest
+    environment: 'prod'
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Run What-if
+        run: | 
+          az deployment group create --resource-group ${{ env.RG_NAME }} --template-file ./deploy/main.bicep --parameters environmentType=${{ jobs.prod.environment }} --what-if 
+
+      - name: Deploy Bicep
+        run: | 
+          az deployment group create --resource-group ${{ env.RG_NAME }} --template-file ./deploy/main.bicep --parameters environmentType=${{ jobs.prod.environment }}
