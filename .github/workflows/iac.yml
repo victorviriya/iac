@@ -65,6 +65,7 @@ jobs:
       ################################################################################################################
 
   gatecheck:
+    needs: deploy2nonprod
     runs-on: ubuntu-latest
     environment: 'prod'
     steps:
@@ -82,6 +83,7 @@ jobs:
           az deployment group create --resource-group ${{ env.PROD_RG_NAME }} --template-file ./deploy/main.bicep --parameters namePrefix=${{ env.NAMEPREFIX }} environmentType=prod --what-if
   
   deploy2prod:
+    needs: gatecheck
     runs-on: ubuntu-latest
     environment: 'prod'
     steps:
