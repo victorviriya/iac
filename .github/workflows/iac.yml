@@ -18,7 +18,6 @@ env:
   NAMEPREFIX: 'wviacdemo'
   EXTERNAL: true
 
-
 jobs:
   deploy2nonprod:
     runs-on: ubuntu-latest
@@ -43,7 +42,7 @@ jobs:
 
       - name: Deploy Bicep
         run: | 
-          az deployment group create --resource-group ${{ env.NONPROD_RG_NAME }} --template-file ./deploy/main.bicep --parameters namePrefix=${{ env.NAMEPREFIX }} environmentType=nonpord external=${{ env.EXTERNAL }} 
+          az deployment group create --resource-group ${{ env.NONPROD_RG_NAME }} --template-file ./deploy/main.bicep --parameters namePrefix=${{ env.NAMEPREFIX }} environmentType=nonprod external=${{ env.EXTERNAL }} 
 
       ################################################################################################################
       #
@@ -97,4 +96,4 @@ jobs:
 
       - name: Deploy Bicep
         run: | 
-          az deployment group create --resource-group ${{ env.PROD_RG_NAME }} --template-file ./deploy/main.bicep --parameters namePrefix=${{ env.NAMEPREFIX }} environmentType=pord external=${{ env.EXTERNAL }}
+          az deployment group create --resource-group ${{ env.PROD_RG_NAME }} --template-file ./deploy/main.bicep --parameters namePrefix=${{ env.NAMEPREFIX }} environmentType=prod external=${{ env.EXTERNAL }}
