@@ -8,6 +8,10 @@ on:
     branches:
       - main
 
+permissions:
+      id-token: write
+      contents: read
+
 env:
   PROD_RG_NAME: 'iac-demo-prod-rg'
   NONPROD_RG_NAME: 'iac-demo-nonprod-rg'
