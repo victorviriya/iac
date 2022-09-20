@@ -9,21 +9,16 @@ on:
       - main
 
 env:
-  RG_NAME: 'iac-demo-rg'
+  PROD_RG_NAME: 'iac-demo-prod-rg'
+  NONPROD_RG_NAME: 'iac-demo-nonprod-rg'
+  NAMEPREFIX: 'wviacdemo'
+  EXTERNAL: true
+
 
 jobs:
-  build:
+  deploy2nonprod:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Validate Bicep
-        run: | 
-          az deployment group validate --resource-group ${{ env.RG_NAME }} --template-file ./deploy/main.bicep
-
-  dev:
-    runs-on: ubuntu-latest
-    environment: 'dev'
+    environment: 'nonprod'
     steps:
       - uses: actions/checkout@v2
       
@@ -34,15 +29,39 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      - name: Validate Bicep
+        run: | 
+          az deployment group validate --resource-group ${{ env.NONPROD_RG_NAME }} --template-file ./deploy/main.bicep
+
       - name: Run What-if
         run: | 
-          az deployment group create --resource-group iac-demo-nonprod-rg --template-file ./deploy/main.bicep --parameters environmentType=nonprod --what-if
+          az deployment group create --resource-group ${{ env.NONPROD_RG_NAME }} --template-file ./deploy/main.bicep --parameters namePrefix=${{ env.NAMEPREFIX }} environmentType=nonprod --what-if
 
       - name: Deploy Bicep
         run: | 
-          az deployment group create --resource-group iac-demo-nonprod-rg --template-file ./deploy/main.bicep --parameters environmentType=nonpord
+          az deployment group create --resource-group ${{ env.NONPROD_RG_NAME }} --template-file ./deploy/main.bicep --parameters namePrefix=${{ env.NAMEPREFIX }} environmentType=nonpord external=${{ env.EXTERNAL }} 
 
-  prod:
+      ################################################################################################################
+      #
+      #  This is a sample of how to get secrets from Azure Key Vault and use them in the workflow
+      #  https://learn.microsoft.com/en-us/azure/developer/github/github-key-vault#reference-the-key-vault-secret
+      #
+      ################################################################################################################
+      #
+      # - uses: Azure/get-keyvault-secrets@v1
+      #   with: 
+      #     keyvault: "containervault"
+      #     secrets: 'containerPassword, containerUsername'
+      #   id: keyvaultSecrets
+      # - uses: azure/docker-login@v1
+      # with:
+      #   login-server: myregistry.azurecr.io
+      #   username: ${{ steps.keyvaultSecrets.outputs.containerUsername }}
+      #   password: ${{ steps.keyvaultSecrets.outputs.containerPassword }}
+      #
+      ################################################################################################################
+
+  gatecheck:
     runs-on: ubuntu-latest
     environment: 'prod'
     steps:
@@ -57,8 +76,21 @@ jobs:
 
       - name: Run What-if
         run: | 
-          az deployment group create --resource-group iac-demo-prod-rg --template-file ./deploy/main.bicep --parameters environmentType=prod --what-if
+          az deployment group create --resource-group ${{ env.PROD_RG_NAME }} --template-file ./deploy/main.bicep --parameters namePrefix=${{ env.NAMEPREFIX }} environmentType=prod --what-if
+  
+  deploy2prod:
+    runs-on: ubuntu-latest
+    environment: 'prod'
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Deploy Bicep
         run: | 
-          az deployment group create --resource-group iac-demo-prod-rg --template-file ./deploy/main.bicep --parameters environmentType=pord
+          az deployment group create --resource-group ${{ env.PROD_RG_NAME }} --template-file ./deploy/main.bicep --parameters namePrefix=${{ env.NAMEPREFIX }} environmentType=pord external=${{ env.EXTERNAL }}

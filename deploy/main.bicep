@@ -1,5 +1,5 @@
 param location string = resourceGroup().location
-param namePrefix string = 'wviriya'
+param namePrefix string = 'cotoso'
 
 @allowed([
   'nonprod'
