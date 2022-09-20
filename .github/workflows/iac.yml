@@ -36,11 +36,11 @@ jobs:
 
       - name: Run What-if
         run: | 
-          az deployment group create --resource-group ${{ env.RG_NAME }} --template-file ./deploy/main.bicep --parameters environmentType=${{ jobs.dev.environment }} --what-if
+          az deployment group create --resource-group iac-demo-nonprod-rg --template-file ./deploy/main.bicep --parameters environmentType=nonprod --what-if
 
       - name: Deploy Bicep
         run: | 
-          az deployment group create --resource-group ${{ env.RG_NAME }} --template-file ./deploy/main.bicep --parameters environmentType=${{ jobs.dev.environment }}
+          az deployment group create --resource-group iac-demo-nonprod-rg --template-file ./deploy/main.bicep --parameters environmentType=nonpord
 
   prod:
     runs-on: ubuntu-latest
@@ -57,8 +57,8 @@ jobs:
 
       - name: Run What-if
         run: | 
-          az deployment group create --resource-group ${{ env.RG_NAME }} --template-file ./deploy/main.bicep --parameters environmentType=${{ jobs.prod.environment }} --what-if 
+          az deployment group create --resource-group iac-demo-prod-rg --template-file ./deploy/main.bicep --parameters environmentType=prod --what-if
 
       - name: Deploy Bicep
         run: | 
-          az deployment group create --resource-group ${{ env.RG_NAME }} --template-file ./deploy/main.bicep --parameters environmentType=${{ jobs.prod.environment }}
+          az deployment group create --resource-group iac-demo-prod-rg --template-file ./deploy/main.bicep --parameters environmentType=pord
