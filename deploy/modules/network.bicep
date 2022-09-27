@@ -10,6 +10,7 @@ param vnetName string = '${namePrefix}-${environmentType}-vnet'
 param addressPrefix string = '10.0.0.0/16'
 param defaultSubnetPrefix string = '10.0.0.0/23'
 param gatewaySubnetPrefix string = '10.0.2.0/28'
+param managementSubnetPrefix string = '10.0.3.0/24'
 
 // virtual network
 resource vnet 'Microsoft.Network/virtualNetworks@2022-01-01' = {
@@ -30,6 +31,12 @@ resource vnet 'Microsoft.Network/virtualNetworks@2022-01-01' = {
         name: 'AppGatewaySubnet'
         properties: {
           addressPrefix: gatewaySubnetPrefix
+        }
+      }
+      {
+        name: 'Management'
+        properties: {
+          addressPrefix: managementSubnetPrefix
         }
       }
     ]

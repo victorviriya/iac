@@ -67,7 +67,7 @@ jobs:
   gatecheck:
     needs: deploy2nonprod
     runs-on: ubuntu-latest
-    environment: 'prod'
+    environment: 'preprod'
     steps:
       - uses: actions/checkout@v2
       

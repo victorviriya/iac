@@ -1,8 +1,9 @@
 parameters:
   location: 'AustraliaEast'
   environment: 'nonprod'
-  name: 'toylaunch'
-  fileName: 'main.json'
+  name: 'wviacadodemo'
+  resourcegroup: ''
+  fileName: 'main.bicep'
 
 stages:
   - stage: 'Validate_${{ parameters.environment }}_${{ parameters.name }}_infrastructure'

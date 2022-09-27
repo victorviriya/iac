@@ -14,7 +14,7 @@ parameters:
   - name: solutionName
     type: string
     displayName: 'Solution Name'
-    default: 'toylaunch'
+    default: 'wviacadodemo'
 
   - name: fileName
     type: string
@@ -38,6 +38,7 @@ stages:
       location: '${{ parameters.location }}'
       environment: 'nonprod'
       name: '${{ parameters.solutionName }}'
+      resourcegroup: 'iac-demo-ado-nonprod-rg'
       fileName: '${{ parameters.fileName }}'
 
   - template: templates/iac_release.yaml
@@ -45,6 +46,7 @@ stages:
       location: '${{ parameters.location }}'
       environment: 'prod'
       name: '${{ parameters.solutionName }}'
+      resourcegroup: 'iac-demo-ado-prod-rg'
       fileName: '${{ parameters.fileName }}'
       
 

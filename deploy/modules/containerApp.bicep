@@ -18,7 +18,7 @@ param minReplica int = 1
 @maxValue(25)
 param maxReplica int = 3
 
-param external bool = true
+param external bool = false
 
 param vnetName string
 
@@ -69,7 +69,7 @@ resource aca 'Microsoft.App/containerApps@2022-03-01' = {
       activeRevisionsMode: 'Multiple'
       ingress: {
         allowInsecure: true
-        external: external
+        external: true
         targetPort: 80
         traffic: [
           {
@@ -130,3 +130,5 @@ resource aca 'Microsoft.App/containerApps@2022-03-01' = {
 }
 
 output fqdn string = aca.properties.configuration.ingress.fqdn
+output domain string = containerAppEnv.properties.defaultDomain
+output lbIp string = containerAppEnv.properties.staticIp

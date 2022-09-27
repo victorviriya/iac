@@ -1,5 +1,5 @@
 param location string = resourceGroup().location
-param namePrefix string = 'cotoso'
+param namePrefix string = 'wviriya'
 
 @allowed([
   'nonprod'
@@ -25,6 +25,15 @@ module containerApp 'modules/containerApp.bicep' = {
     environmentType: environmentType
     vnetName: vnet.outputs.name
     external: external
+  }
+}
+
+module privateDNSZone 'modules/privateDnsZone.bicep' = {
+  name: '${namePrefix}-privateDNSZone'
+  params: {
+    privateDnsZoneName: containerApp.outputs.domain
+    vnetName: vnet.outputs.name
+    acaIp: containerApp.outputs.lbIp
   }
 }
 

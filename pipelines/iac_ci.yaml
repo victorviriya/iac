@@ -30,11 +30,19 @@ stages:
         targetType: 'inline'
         script: 'az bicep build --file ${{ variables._filePath }}${{ variables._fileName }}.bicep'
 
+    - task: AzureResourceManagerTemplateDeployment@3
+      inputs:
+        connectedServiceName: 'azure_service_connection'
+        location: $(deploymentDefaultLocation)
+        deploymentMode: Validation
+        resourceGroupName: 'iac-demo-ado-nonprod-rg'
+        csmFile: ${{ variables._filePath }}${{ variables._fileName }}.bicep
+
     - task: CopyFiles@2
       displayName: 'Copy ARM Template files to Staging directory'
       inputs:
         SourceFolder: '${{ variables._filePath }}'
-        Contents: '${{ variables._fileName }}.json'
+        Contents: '${{ variables._fileName }}.bicep'
         TargetFolder: '$(Build.ArtifactStagingDirectory)/templates'
 
     - task: PublishBuildArtifacts@1
@@ -42,37 +50,3 @@ stages:
       inputs:
         PathtoPublish: '$(Build.ArtifactStagingDirectory)/templates'
         ArtifactName: 'templates'
-
-  - job: Build_App
-    steps:
-      - task: UseDotNet@2
-        displayName: 'Use .NET Core sdk'
-        inputs:
-          packageType: sdk
-          version: '5.0.x'
-
-      - task: DotNetCoreCLI@2
-        displayName: Restore
-        inputs:
-          command: restore
-          projects: '**/*.csproj'
-
-      - task: DotNetCoreCLI@2
-        displayName: dotnet build
-        inputs:
-          command: 'build'
-          projects: '**/*.csproj'
-
-      - task: DotNetCoreCLI@2
-        displayName: dotnet publish
-        inputs:
-          command: publish
-          publishWebProjects: True
-          arguments: '--output $(Build.ArtifactStagingDirectory)/app'
-          zipAfterPublish: True
-
-      - task: PublishBuildArtifacts@1
-        displayName: Publish artifacts
-        inputs:
-          pathtoPublish: '$(Build.ArtifactStagingDirectory)/app' 
-          artifactName: 'app'

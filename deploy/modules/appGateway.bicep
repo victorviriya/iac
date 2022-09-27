@@ -25,6 +25,9 @@ resource publicIp 'Microsoft.Network/publicIPAddresses@2021-08-01' = {
     publicIPAddressVersion: 'IPv4'
     publicIPAllocationMethod: 'Static'
     idleTimeoutInMinutes: 4
+    dnsSettings: {
+      domainNameLabel: '${namePrefix}-${environmentType}'
+    }
   }
 }
 
@@ -126,10 +129,10 @@ resource appGateway 'Microsoft.Network/applicationGateways@2021-08-01' = {
       {
         name: 'myHTTPSetting'
         properties: {
-          port: 80
-          protocol: 'Http'
+          port: 443
+          protocol: 'Https'
           cookieBasedAffinity: 'Disabled'
-          pickHostNameFromBackendAddress: false
+          pickHostNameFromBackendAddress: true
           requestTimeout: 20
         }
       }
@@ -173,7 +176,7 @@ resource appGateway 'Microsoft.Network/applicationGateways@2021-08-01' = {
     enableHttp2: false
     webApplicationFirewallConfiguration: {
       enabled: true
-      firewallMode: 'Prevention'
+      firewallMode: 'Detection'
       ruleSetType: 'OWASP'
       ruleSetVersion: '3.1'
       requestBodyCheck: true
