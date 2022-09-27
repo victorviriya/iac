@@ -19,7 +19,7 @@ parameters:
   - name: fileName
     type: string
     displayName: 'ARM Template File Name'
-    default: 'main.json'
+    default: 'main.bicep'
 
 resources:
   pipelines:
