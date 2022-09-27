@@ -23,8 +23,8 @@ parameters:
 
 resources:
   pipelines:
-    - pipeline: ci
-      source: fta-live-iac-ci
+    - pipeline: 100
+      source: IaC_CI
       trigger: true
 
 trigger: none
@@ -40,11 +40,6 @@ stages:
       name: '${{ parameters.solutionName }}'
       fileName: '${{ parameters.fileName }}'
 
-  - template: templates/app_release.yml
-    parameters:
-      environment: 'nonprod'
-      name: '${{ parameters.solutionName }}'
-
   - template: templates/iac_release.yaml
     parameters:
       location: '${{ parameters.location }}'
@@ -52,8 +47,4 @@ stages:
       name: '${{ parameters.solutionName }}'
       fileName: '${{ parameters.fileName }}'
       
-  - template: templates/app_release.yml
-    parameters:
-      environment: 'prod'
-      name: '${{ parameters.solutionName }}'
 
