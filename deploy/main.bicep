@@ -8,6 +8,12 @@ param namePrefix string = 'wviriya'
 param environmentType string = 'nonprod'
 param external bool = false
 
+@allowed([
+  'agw'
+  'afdx'
+])
+param loadBalancerType string = 'agw'
+
 module vnet 'modules/network.bicep' = {
   name: '${namePrefix}-vnet'
   params: {
@@ -28,7 +34,7 @@ module containerApp 'modules/containerApp.bicep' = {
   }
 }
 
-module privateDNSZone 'modules/privateDnsZone.bicep' = {
+module privateDNSZone 'modules/privateDnsZone.bicep' =  {
   name: '${namePrefix}-privateDNSZone'
   params: {
     privateDnsZoneName: containerApp.outputs.domain
@@ -37,7 +43,7 @@ module privateDNSZone 'modules/privateDnsZone.bicep' = {
   }
 }
 
-module appGateway 'modules/appGateway.bicep' = if (!external) {
+module appGateway 'modules/appGateway.bicep' = if (loadBalancerType=='agw' && !external) {
   name: '${namePrefix}-appGateway'
   params: {
     location: location
@@ -48,12 +54,12 @@ module appGateway 'modules/appGateway.bicep' = if (!external) {
   }
 }
 
-module frontDoor 'modules/frontdoor.bicep' = if (external) {
+module frontDoor 'modules/frontdoor.bicep' = if (loadBalancerType=='afdx') {
   name: '${namePrefix}-frontDoor'
   params: {
     namePrefix: namePrefix
     environmentType: environmentType
-    backendAddress: containerApp.outputs.fqdn
+    hostName: containerApp.outputs.fqdn
   }
 }
 
